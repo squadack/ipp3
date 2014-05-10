@@ -1,0 +1,4 @@
+[Project]
+Name=Ipp3
+Manager=KDevCMakeManager
+VersionControl=kdevgit
