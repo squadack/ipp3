@@ -67,7 +67,12 @@ Ipp3Window::Ipp3Window()
 	viewA->setScene(sceneA);
 	viewB->setScene(sceneB);
 	viewLayout->addWidget(viewA);
-	viewLayout->addWidget(viewB);
+// 	viewLayout->addWidget(viewB);
+	QStringListModel *smodl = new QStringListModel(tests[0]->getWords());
+	QListView *lview = new QListView();
+	lview->setModel(smodl);
+
+	viewLayout->addWidget(lview);
 	layout->addLayout(viewLayout);
 	
 	QVBoxLayout *buttonLayout = new QVBoxLayout();
