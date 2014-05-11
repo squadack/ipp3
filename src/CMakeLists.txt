@@ -1,6 +1,7 @@
 set (SOURCES
 	Ipp3Window.cpp
 	Test.cpp
+	GraphicsView.cpp
 	main.cpp
 )
 

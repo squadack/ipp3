@@ -45,44 +45,38 @@ Ipp3Window::Ipp3Window()
 	:QMainWindow(nullptr)
 {
 	setMinimumSize(800, 600);
-	
+	current_test = -1;
+	loadTests();
 	QWidget *central = new QWidget(this);
     setCentralWidget(central);
-	
-	loadTests();
-	
 	QHBoxLayout *layout = new QHBoxLayout();
-	
 	QVBoxLayout *viewLayout = new QVBoxLayout();
-	QGraphicsView *viewA = new QGraphicsView();
+	viewA = new QGraphicsView();
 	viewA->setAlignment(Qt::AlignLeft | Qt::AlignTop);
-	QGraphicsView *viewB = new QGraphicsView();
-	QGraphicsScene *sceneA = new QGraphicsScene();
-	//testing
-	
-	sceneA->addItem(tests[0]);
-	
-	QGraphicsScene *sceneB = new QGraphicsScene();
-////////////////////	
+	sceneA = new QGraphicsScene();
+	lview = new QListView();
 	viewA->setScene(sceneA);
-	viewB->setScene(sceneB);
 	viewLayout->addWidget(viewA);
-// 	viewLayout->addWidget(viewB);
-	QStringListModel *smodl = new QStringListModel(tests[0]->getWords());
-	QListView *lview = new QListView();
-	lview->setModel(smodl);
-
 	viewLayout->addWidget(lview);
 	layout->addLayout(viewLayout);
 	
+	
+	nexttest();
+	
+	
+	
 	QVBoxLayout *buttonLayout = new QVBoxLayout();
-	QPushButton *buttonz[3];
-	for (auto a : buttonz)
+	for (int i = 0; i < 3; i++)
 	{
-		a = new QPushButton();
-		a->setText("test");
-		buttonLayout->addWidget(a);
+		buttonz[i] = new QPushButton();
+		buttonLayout->addWidget(buttonz[i]);
 	}
+	buttonz[0]->setText("&Next");
+	for (int i = 1; i < 3; i++)
+	{
+		buttonz[i]->setText("test");
+	}
+	connect(buttonz[0], SIGNAL(clicked()), this, SLOT(nexttest()));
 	layout->addLayout(buttonLayout);
 	
 	central->setLayout(layout);
@@ -100,6 +94,29 @@ Ipp3Window::~Ipp3Window()
 	{
 		delete a;
 	}
+	delete sceneA;
+	delete lview;
 }
 
+void Ipp3Window::nexttest()
+{
+	sceneA->clear();
+// 	if (smodl != nullptr) //chyba con nieco tu cieknie
+// 	{
+// 		delete smodl;
+// 		smodl = nullptr;
+// 	}
+	if (++current_test < tests.count())
+	{
+		sceneA->addItem(tests[current_test]);
+		smodl = new QStringListModel(tests[current_test]->getWords());
+		lview->setModel(smodl);
+	}
+	else
+	{
+		sceneA->addText("KONIEC");
+		buttonz[0]->setText("&Close");
+		connect(buttonz[0], SIGNAL(clicked()), qApp, SLOT(quit()));
+	}
+}
 
