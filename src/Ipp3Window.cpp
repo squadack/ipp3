@@ -90,11 +90,11 @@ Ipp3Window::Ipp3Window()
 
 Ipp3Window::~Ipp3Window()
 {
-	for (auto a : tests)
-	{
-		delete a;
-	}
+	qDebug() << "a";
+
+	qDebug() << "b";
 	delete sceneA;
+	qDebug() << "c";
 	delete lview;
 }
 
@@ -115,8 +115,8 @@ void Ipp3Window::nexttest()
 	else
 	{
 		sceneA->addText("KONIEC");
-		buttonz[0]->setText("&Close");
-		connect(buttonz[0], SIGNAL(clicked()), qApp, SLOT(quit()));
+// 		buttonz[0]->setText("&Close");
+// 		connect(buttonz[0], SIGNAL(clicked()), qApp, SLOT(quit()));
 	}
 }
 
