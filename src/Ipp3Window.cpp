@@ -51,10 +51,15 @@ Ipp3Window::Ipp3Window()
     setCentralWidget(central);
 	QHBoxLayout *layout = new QHBoxLayout();
 	QVBoxLayout *viewLayout = new QVBoxLayout();
-	viewA = new QGraphicsView();
+	viewA = new GraphicsView();
 	viewA->setAlignment(Qt::AlignLeft | Qt::AlignTop);
 	sceneA = new QGraphicsScene();
-	lview = new QListView();
+	lview = new ListView();
+	lview->setDragEnabled(true);
+	lview->setDragDropMode(QAbstractItemView::DragOnly);
+	connect(viewA, SIGNAL(muthafucka()), lview, SLOT(debugCurrentIndex()));
+// 	lview->setFlow(QListView::LeftToRight);
+// 	lview->setSelectionMode(QAbstractItemView::NoSelection);
 	viewA->setScene(sceneA);
 	viewLayout->addWidget(viewA);
 	viewLayout->addWidget(lview);
@@ -90,11 +95,7 @@ Ipp3Window::Ipp3Window()
 
 Ipp3Window::~Ipp3Window()
 {
-	qDebug() << "a";
-
-	qDebug() << "b";
 	delete sceneA;
-	qDebug() << "c";
 	delete lview;
 }
 
@@ -106,8 +107,14 @@ void Ipp3Window::nexttest()
 // 		delete smodl;
 // 		smodl = nullptr;
 // 	}
+// 	disconnect(tests[current_test], SIGNAL(dropaccepted()), lview, SLOT(deleteCurrentRow()));
+// 	disconnect(viewA, SIGNAL(dropped(QPoint)), tests[current_test], SLOT(considerdrop(QPoint)));
 	if (++current_test < tests.count())
 	{
+		connect(viewA, SIGNAL(dropped(QPoint)), tests[current_test], SLOT(considerdrop(QPoint)));
+		connect(tests[current_test], SIGNAL(dropaccepted()), lview, SLOT(deleteCurrentRow()));
+		connect(tests[current_test], SIGNAL(gimmeString()), lview, SLOT(stringRequest()));
+		connect(lview, SIGNAL(currentString(QString)), tests[current_test], SLOT(setgap(QString)));
 		sceneA->addItem(tests[current_test]);
 		smodl = new QStringListModel(tests[current_test]->getWords());
 		lview->setModel(smodl);

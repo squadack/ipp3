@@ -2,6 +2,8 @@
 #define IPP3WINDOW_H
 
 #include "Test.h"
+#include "GraphicsView.h"
+#include "ListView.h"
 #include <QtWidgets>
 
 class Ipp3Window : public QMainWindow
@@ -11,9 +13,9 @@ class Ipp3Window : public QMainWindow
 	QList<Test*> tests;
 	int current_test;
 	QGraphicsScene *sceneA;
-	QListView *lview;
+	ListView *lview;
     QStringListModel *smodl;
-    QGraphicsView *viewA;
+    GraphicsView *viewA;
 	QPushButton *buttonz[3];
 	
 	void loadTests();

@@ -2,6 +2,7 @@ set (SOURCES
 	Ipp3Window.cpp
 	Test.cpp
 	GraphicsView.cpp
+	ListView.cpp
 	main.cpp
 )
 
