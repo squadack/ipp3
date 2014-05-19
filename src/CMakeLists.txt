@@ -1,8 +1,9 @@
-set (SOURCES
+set (SOURCES 
 	Ipp3Window.cpp
 	Test.cpp
-	GraphicsView.cpp
-	ListView.cpp
+	DraggableLabel.cpp
+	DragAndDropView.cpp
+	GraphicsScene.cpp
 	main.cpp
 )
 

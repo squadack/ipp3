@@ -35,6 +35,7 @@ void Ipp3Window::loadTests()
 		qDebug() << "Successfully loaded tests.";
 	}
 	
+	//DEBUG
 	for (auto a : tests)
 	{
 		a->todebug();
@@ -44,25 +45,33 @@ void Ipp3Window::loadTests()
 Ipp3Window::Ipp3Window()
 	:QMainWindow(nullptr)
 {
-	setMinimumSize(800, 600);
+	setFixedSize(800, 600);
+	corr = all = 0;
+	locked = true;
+	drag.setVisible(false);
 	current_test = -1;
 	loadTests();
 	QWidget *central = new QWidget(this);
     setCentralWidget(central);
 	QHBoxLayout *layout = new QHBoxLayout();
 	QVBoxLayout *viewLayout = new QVBoxLayout();
-	viewA = new GraphicsView();
+	
+// 	gbox = new QGroupBox();
+	
+	viewA = new DragAndDropView();
+	viewA->setAcceptDrops(true);
 	viewA->setAlignment(Qt::AlignLeft | Qt::AlignTop);
-	sceneA = new QGraphicsScene();
-	lview = new ListView();
-	lview->setDragEnabled(true);
-	lview->setDragDropMode(QAbstractItemView::DragOnly);
-	connect(viewA, SIGNAL(muthafucka()), lview, SLOT(debugCurrentIndex()));
-// 	lview->setFlow(QListView::LeftToRight);
-// 	lview->setSelectionMode(QAbstractItemView::NoSelection);
+	viewB = new DragAndDropView();
+	viewB->setAcceptDrops(false);
+	viewB->setAlignment(Qt::AlignLeft | Qt::AlignTop);
+	sceneA = new GraphicsScene();
+	sceneB = new GraphicsScene();
+	
 	viewA->setScene(sceneA);
+	viewB->setScene(sceneB);
 	viewLayout->addWidget(viewA);
-	viewLayout->addWidget(lview);
+// 	viewLayout->addWidget(gbox);
+	viewLayout->addWidget(viewB);
 	layout->addLayout(viewLayout);
 	
 	
@@ -71,59 +80,99 @@ Ipp3Window::Ipp3Window()
 	
 	
 	QVBoxLayout *buttonLayout = new QVBoxLayout();
-	for (int i = 0; i < 3; i++)
+	for (int i = 0; i < 2; i++)
 	{
 		buttonz[i] = new QPushButton();
 		buttonLayout->addWidget(buttonz[i]);
 	}
-	buttonz[0]->setText("&Next");
-	for (int i = 1; i < 3; i++)
-	{
-		buttonz[i]->setText("test");
-	}
-	connect(buttonz[0], SIGNAL(clicked()), this, SLOT(nexttest()));
+	buttonz[0]->setText("&Check");
+	buttonz[1]->setText("&Next");
+	connect(buttonz[1], SIGNAL(clicked()), this, SLOT(nexttest()));
+	connect(buttonz[0], SIGNAL(clicked()), this, SLOT(check()));
+	correctcount.setText("Poprawnie:\n" + QString::number(corr) + " z " + QString::number(all));
+	buttonLayout->addWidget(&correctcount);
+	
 	layout->addLayout(buttonLayout);
 	
 	central->setLayout(layout);
 	
     QAction* a = new QAction(this);
     a->setText( "Quit" );
-	a->setShortcut(QKeySequence("Ctrl+Shift+0"));
+	a->setShortcut(QKeySequence("Ctrl+Shift+Z"));
     connect(a, SIGNAL(triggered()), SLOT(close()) );
     menuBar()->addMenu( "&File" )->addAction( a );
 }
 
 Ipp3Window::~Ipp3Window()
 {
-	delete sceneA;
-	delete lview;
+
+}
+
+QStringList mix(const QStringList list) {
+	QStringList temp(list), result;
+	int x;
+	for (int i = 0; i < list.length(); i++)
+	{
+		x = qrand() % temp.length();
+		result.append(temp[x]);
+		temp.removeAt(x);
+	}
+	return result;
 }
 
 void Ipp3Window::nexttest()
 {
-	sceneA->clear();
-// 	if (smodl != nullptr) //chyba con nieco tu cieknie
-// 	{
-// 		delete smodl;
-// 		smodl = nullptr;
-// 	}
-// 	disconnect(tests[current_test], SIGNAL(dropaccepted()), lview, SLOT(deleteCurrentRow()));
-// 	disconnect(viewA, SIGNAL(dropped(QPoint)), tests[current_test], SLOT(considerdrop(QPoint)));
+	if (!locked)
+		check();
 	if (++current_test < tests.count())
 	{
-		connect(viewA, SIGNAL(dropped(QPoint)), tests[current_test], SLOT(considerdrop(QPoint)));
-		connect(tests[current_test], SIGNAL(dropaccepted()), lview, SLOT(deleteCurrentRow()));
-		connect(tests[current_test], SIGNAL(gimmeString()), lview, SLOT(stringRequest()));
-		connect(lview, SIGNAL(currentString(QString)), tests[current_test], SLOT(setgap(QString)));
-		sceneA->addItem(tests[current_test]);
-		smodl = new QStringListModel(tests[current_test]->getWords());
-		lview->setModel(smodl);
+		delete sceneA;
+		sceneA = new GraphicsScene(tests[current_test]);
+		viewA->setScene(sceneA);
+		delete sceneB;
+		sceneB = new GraphicsScene(mix(tests[current_test]->getWords()));
+		viewB->setScene(sceneB);
+		connect(viewA, SIGNAL(disappearB(int)), sceneB, SLOT(hide(int)));
+		
 	}
 	else
 	{
+		delete sceneA;
+		sceneA = new GraphicsScene();
+		viewA->setScene(sceneA);
+		delete sceneB;
+		sceneB = new GraphicsScene();
+		viewB->setScene(sceneB);
 		sceneA->addText("KONIEC");
-// 		buttonz[0]->setText("&Close");
-// 		connect(buttonz[0], SIGNAL(clicked()), qApp, SLOT(quit()));
+		buttonz[0]->setVisible(false);
+		buttonz[1]->setText("&Close");
+		connect(buttonz[1], SIGNAL(clicked()), qApp, SLOT(quit()));
+	}
+	locked = false;
+}
+
+void Ipp3Window::check()
+{
+	if (!locked)
+	{
+		for (auto a : sceneA->Tab())
+		{
+			if (a->isDraggable())
+			{
+				all++;
+				if (a->isCorrect())
+					corr++;
+			}
+		}
+		correctcount.setText("Poprawnie:\n" + QString::number(corr) + " z " + QString::number(all));
+		qDebug() << "testutestu";
+		for (auto a : sceneA->Tab())
+			a->setDraggable(false);
+		for (auto a : sceneB->Tab())
+			a->setDraggable(false);
+		locked = true;
 	}
 }
+
+
 
